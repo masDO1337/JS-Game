@@ -4,7 +4,8 @@
   "description": "2d game simpe tile based",
   "main": "index.js",
   "scripts": {
-    "client": "webserver run 8000 ./Client"
+    "compale":"tsc",
+    "client": "webserver run 8000 ./"
   },
   "author": "masDO1337",
   "license": "ISC",
