@@ -1,0 +1,14 @@
+* {
+    all: unset;
+    margin: 0;
+    padding: 0;
+}
+
+head {
+    display: none;
+}
+
+html, body {
+    background-color: black;
+    overflow: hidden;
+}

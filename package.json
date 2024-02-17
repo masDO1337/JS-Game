@@ -1,0 +1,14 @@
+{
+  "name": "js-game",
+  "version": "1.0.0",
+  "description": "2d game simpe tile based",
+  "main": "index.js",
+  "scripts": {
+    "client": "webserver run 8000 ./Client"
+  },
+  "author": "masDO1337",
+  "license": "ISC",
+  "dependencies": {
+    "webserver": "^5.0.1"
+  }
+}
