@@ -1,45 +1,38 @@
-import { getContext } from "./core.js";
-import { on } from "./events.js";
 import { Updatable, clamp, removeFromArray, rotatePoint } from "./helpers.js";
 import Vector from "./vector.js";
 
 export default class GameObject extends Updatable {
-    context: CanvasRenderingContext2D = getContext();
     anchor: Vector = new Vector();
     parent: GameObject | null = null;
-    private _rf: () => void = this.draw;
-    private _uf: (dt?: number) => void = this.advance;
-    private _ready: boolean = false;
+    _ready: boolean = false;
+    _world = {x: 0, y: 0, w: 0, h: 0, o: 1, r: 0, sx: 1, sy: 1};
+    _w: number = 0;
+    _h: number = 0;
+    _opa: number = 1;
+    _rot: number = 0;
+    _scx: number = 1;
+    _scy: number = 1;
 
-    init({
-        render = this.draw,
-        update = this.advance,
-        children = [],
-        ...props
-    } = {}){
-        super.init({...props});
-
+    constructor({width = 0, height = 0, opacity = 1, rotation = 0, scaleX = 1, scaleY = 1, children = [], ...props} = {}) {
+        super(props);
+        this.width = width;
+        this.height = height;
+        this.opacity = opacity;
+        this.rotation = rotation;
+        this.scaleX = scaleX;
+        this.scaleY = scaleY;
         this._ready = true;
         this._updateWorldPos();
 
         this.addChild(children);
-
-        this._rf = render;
-
-        this._uf = update;
-
-        on('init', () => {
-            this.context = getContext();
-        });
     }
 
     update(dt?: number) : void {
-        this._uf(dt);
+        super.update(dt);
         this.children.map((child: GameObject) => {child.update(dt)});
     }
 
-    render() : void {
-        let context = this.context;
+    render(context: CanvasRenderingContext2D) : void {
         context.save();
     
         if (this.x || this.y) {
@@ -61,29 +54,28 @@ export default class GameObject extends Updatable {
             context.translate(anchorX, anchorY);
         }
 
-        this.context.globalAlpha = this.opacity;
+        context.globalAlpha = this.opacity;
     
-        this._rf();
+        this.draw(context);
 
         if (anchorX || anchorY) {
             context.translate(-anchorX, -anchorY);
         }
 
         let children = this.children;
-        children.map((child: GameObject) => {child.render()});
+        children.map((child: GameObject) => {child.render(context)});
     
         context.restore();
     }
 
-    draw() : void {}
+    draw(context: CanvasRenderingContext2D) : void {}
 
     _pc() : void {
-        if (this._ready) return;
+        
+        if (!this._ready) return;
         this._updateWorldPos();
         this.children.map((child: GameObject) => child._pc());
     }
-
-    private _world = {x: 0, y: 0, w: 0, h: 0, o: 1, r: 0, sx: 1, sy: 1};
 
     _updateWorldPos() : void {
         let {
@@ -163,8 +155,6 @@ export default class GameObject extends Updatable {
         this._pc();
     }
 
-    private _w: number = 0;
-
     get width() {
         return this._w;
     }
@@ -173,8 +163,6 @@ export default class GameObject extends Updatable {
         this._w = value;
         this._pc();
     }
-
-    private _h: number = 0;
 
     get height() {
         return this._h;
@@ -196,8 +184,6 @@ export default class GameObject extends Updatable {
         return this._c;
     }
 
-    private _opa: number = 1;
-
     get opacity() {
         return this._opa;
     }
@@ -206,8 +192,6 @@ export default class GameObject extends Updatable {
         this._opa = clamp(0, 1, value);
         this._pc();
     }
-
-    private _rot: number = 0;
 
     get rotation() {
         return this._rot;
@@ -223,8 +207,6 @@ export default class GameObject extends Updatable {
         this.scaleY = y;
     }
 
-    private _scx: number = 1;
-
     get scaleX() {
         return this._scx;
     }
@@ -233,8 +215,6 @@ export default class GameObject extends Updatable {
         this._scx = value;
         this._pc();
     }
-
-    private _scy: number = 1;
 
     get scaleY() {
         return this._scy;

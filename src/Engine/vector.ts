@@ -75,6 +75,10 @@ export default class Vector {
         return Math.atan2(this.y, this.x);
     }
 
+    cross(vec: Vector) : number {
+        return this.x * vec.y - vec.y * this.x;
+    }
+
     // Clamp the Vector between two points, preventing `x` and `y` from going below or above the minimum and maximum values. Perfect for keeping a sprite from going outside the game boundaries.
     clamp(xMin: number = 0, yMin: number = 0, xMax: number = 1, yMax: number = 1) {
         this._c = true;

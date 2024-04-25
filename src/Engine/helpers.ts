@@ -90,19 +90,13 @@ export class Updatable {
     position: Vector;
     velocity: Vector;
     acceleration: Vector;
-    ttl: number;
 
-    constructor(properties = {}) {
+    constructor({...props}) {
         this.position = new Vector();
         this.velocity = new Vector();
         this.acceleration = new Vector();
-        this.ttl = Infinity;
 
-        this.init(properties);
-    }
-
-    init(properties = {}) : void {
-        Object.assign(this, properties);
+        Object.assign(this, props);
     }
 
     update(dt?: number) : void {
@@ -125,7 +119,6 @@ export class Updatable {
     
         this.position = this.position.add(velocity);
         this._pc();
-        this.ttl--;
     }
 
     // --------------------------------------------------
@@ -166,10 +159,6 @@ export class Updatable {
     
     set acy(value: number) {
         this.acceleration.y = value;
-    }
-
-    isAlive() : boolean {
-        return this.ttl > 0;
     }
 
     _pc() : void {}
