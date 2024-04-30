@@ -3,7 +3,7 @@ import { emit } from './events.js';
 type GameLoopType = { 
     fps?: number;
     update?: (dt: number) => void;
-    render: () => void;
+    render?: () => void;
     blur?: boolean;
 };
 
@@ -18,13 +18,9 @@ type LoopType = {
 export default function GameLoop({
     fps = 60,
     update = () => {},
-    render,
+    render = () => {},
     blur = false
 }: GameLoopType) : LoopType {
-
-    if (!render) {
-        throw Error('You must provide a render() function');
-    }
 
     let focused: boolean = true;
 
@@ -40,7 +36,23 @@ export default function GameLoop({
     let accumulator: number = 0;
     let delta: number = 1e3 / fps; // delta between performance.now timings (in ms)
     let step: number = 1 / fps;
-    let last: number, rAF: number, now: number, dt: number, loop: LoopType;
+    let last: number, rAF: number, now: number, dt: number;
+
+    let loop = {
+        update,
+        render,
+        isStopped: true,
+        start() {
+            last = performance.now();
+            this.isStopped = false;
+            requestAnimationFrame(frame);
+        },
+
+        stop() {
+            this.isStopped = true;
+            cancelAnimationFrame(rAF);
+        },
+    };
 
     function frame() : void {
         rAF = requestAnimationFrame(frame);
@@ -66,22 +78,6 @@ export default function GameLoop({
         }
         loop.render();
     }
-
-    loop = {
-        update,
-        render,
-        isStopped: true,
-        start() {
-            last = performance.now();
-            this.isStopped = false;
-            requestAnimationFrame(frame);
-        },
-
-        stop() {
-            this.isStopped = true;
-            cancelAnimationFrame(rAF);
-        },
-    };
 
     return loop;
 }

@@ -18,6 +18,8 @@ export function clear() : void {
 function resize(w: number = window.innerWidth, h: number = window.innerHeight) : void {
     canvasEl.width = w;
     canvasEl.height = h;
+    console.log("r");
+    
 }
 
 type initType = {
@@ -45,7 +47,7 @@ export function init({canvas, width, height}: initType = {}) : {canvas: HTMLCanv
     context = <CanvasRenderingContext2D>canvasEl.getContext('2d');
     context.imageSmoothingEnabled = false;
 
-    if (!fullWindow) {
+    if (fullWindow) {
         window.addEventListener('resize', () => { resize(); });
     }
 
