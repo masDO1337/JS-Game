@@ -15,11 +15,10 @@ export function clear() : void {
     context.clearRect(0, 0, canvasEl.width, canvasEl.height);
 }
 
-function resize(w: number = window.innerWidth, h: number = window.innerHeight) : void {
-    canvasEl.width = w;
-    canvasEl.height = h;
-    console.log("r");
-    
+function resize(width: number = window.innerWidth, height: number = window.innerHeight) : void {
+    canvasEl.width = width;
+    canvasEl.height = height;
+    emit('resize');
 }
 
 type initType = {
@@ -48,7 +47,7 @@ export function init({canvas, width, height}: initType = {}) : {canvas: HTMLCanv
     context.imageSmoothingEnabled = false;
 
     if (fullWindow) {
-        window.addEventListener('resize', () => { resize(); });
+        window.addEventListener('resize', () => resize());
     }
 
     emit('init');

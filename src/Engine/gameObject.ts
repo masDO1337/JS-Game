@@ -4,14 +4,15 @@ import Vector from "./vector.js";
 export default class GameObject extends Updatable {
     anchor: Vector = new Vector();
     parent: GameObject | null = null;
-    _ready: boolean = false;
-    _world = {x: 0, y: 0, w: 0, h: 0, o: 1, r: 0, sx: 1, sy: 1};
-    _w: number = 0;
-    _h: number = 0;
-    _opa: number = 1;
-    _rot: number = 0;
-    _scx: number = 1;
-    _scy: number = 1;
+    private _ready: boolean = false;
+    private _world = {x: 0, y: 0, w: 0, h: 0, o: 1, r: 0, sx: 1, sy: 1};
+    private _w: number = 0;
+    private _h: number = 0;
+    private _opa: number = 1;
+    private _rot: number = 0;
+    private _scx: number = 1;
+    private _scy: number = 1;
+    private _c: [] = [];
 
     constructor({width = 0, height = 0, opacity = 1, rotation = 0, scaleX = 1, scaleY = 1, children = [], ...props} = {}) {
         super(props);
@@ -29,7 +30,7 @@ export default class GameObject extends Updatable {
 
     update(dt?: number) : void {
         super.update(dt);
-        this.children.map((child: GameObject) => {child.update(dt)});
+        this.children.map((child: GameObject) => child.update(dt));
     }
 
     render(context: CanvasRenderingContext2D) : void {
@@ -172,8 +173,6 @@ export default class GameObject extends Updatable {
         this._h = value;
         this._pc();
     }
-
-    private _c: [] = [];
 
     set children(value) {
         this.removeChild(this._c);
