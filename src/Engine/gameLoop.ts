@@ -1,15 +1,17 @@
+import { getVWindow } from './core.js';
 import { emit } from './events.js';
+
 
 type GameLoopType = { 
     fps?: number;
     update?: (dt: number) => void;
-    render?: () => void;
+    render?: (context: CanvasRenderingContext2D) => void;
     blur?: boolean;
 };
 
 type LoopType = {
     update: (dt: number) => void;
-    render: () => void;
+    render: (context: CanvasRenderingContext2D) => void;
     isStopped: boolean;
     start: () => void;
     stop: () => void;
@@ -20,7 +22,8 @@ export default function GameLoop({
     update = () => {},
     render = () => {},
     blur = false
-}: GameLoopType) : LoopType {
+}: GameLoopType = {}) : LoopType {
+    let WINDOW = getVWindow();
 
     let focused: boolean = true;
 
@@ -76,7 +79,12 @@ export default function GameLoop({
     
             accumulator -= delta;
         }
-        loop.render();
+        WINDOW.context.clearRect(0, 0, WINDOW.canvasEl.width, WINDOW.canvasEl.height);
+        WINDOW.context.save();
+        WINDOW.context.translate(WINDOW.x, WINDOW.y);
+        WINDOW.context.scale(WINDOW.scale, WINDOW.scale);
+        loop.render(WINDOW.context);
+        WINDOW.context.restore();
     }
 
     return loop;

@@ -2,14 +2,18 @@
   "name": "js-game",
   "version": "1.0.0",
   "description": "2d game simpe tile based",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
-    "compale":"tsc",
-    "client": "webserver run 8000 ./"
+    "start": "node",
+    "compale": "tsc",
+    "dev": "nodemon --exec 'tsc'"
   },
   "author": "masDO1337",
   "license": "ISC",
   "dependencies": {
+    "express": "^4.19.2",
+    "nodemon": "^3.1.0",
+    "soket.io": "^0.0.1-security",
     "webserver": "^5.0.1"
   }
 }

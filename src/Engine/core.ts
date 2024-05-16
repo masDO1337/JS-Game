@@ -1,33 +1,54 @@
-import { emit } from "./events.js";
+export type WINDOWType = {
+    canvasEl: HTMLCanvasElement,
+    context: CanvasRenderingContext2D,
+    virtualEnable: boolean, 
+    width: number,
+    height: number,
+    scale: number,
+    x: number,
+    y: number
+}
 
-let canvasEl: HTMLCanvasElement, context: CanvasRenderingContext2D;
-let fullWindow: boolean = true;
+let WINDOW: WINDOWType;
 
-export function getCanvas() : HTMLCanvasElement {
-    return canvasEl;
+export function getVWindow() : WINDOWType {
+    return WINDOW;
 }
 
 export function getContext() : CanvasRenderingContext2D {
-    return context;
+    return WINDOW.context;
+}
+
+function getWindowScale() : number {
+    return Math.min(WINDOW.canvasEl.width / WINDOW.width, WINDOW.canvasEl.height / WINDOW.height);
+}
+
+function getWindowX() : number{
+    return WINDOW.canvasEl.width / 2 - (WINDOW.width * getWindowScale()) / 2;
+
+}
+
+function getWindowY() : number{
+    return WINDOW.canvasEl.height / 2 - (WINDOW.height * getWindowScale()) / 2;
 }
 
 export function clear() : void {
-    context.clearRect(0, 0, canvasEl.width, canvasEl.height);
+    WINDOW.context.clearRect(0, 0, WINDOW.canvasEl.width, WINDOW.canvasEl.height);
 }
 
-function resize(width: number = window.innerWidth, height: number = window.innerHeight) : void {
-    canvasEl.width = width;
-    canvasEl.height = height;
-    emit('resize');
+export function resize(width: number, height: number) : void {
+    WINDOW.width = width;
+    WINDOW.height = height;
 }
 
-type initType = {
-    canvas?: string;
-    width?: number;
-    height?: number;
+export function windowResize() : void {
+    WINDOW.context.translate(getWindowX(), getWindowY());
+    WINDOW.context.scale(getWindowScale(), getWindowScale());
 }
 
-export function init({canvas, width, height}: initType = {}) : {canvas: HTMLCanvasElement, context: CanvasRenderingContext2D} {
+export function initCanvas({canvas, width, height, virtual = false}: {canvas?: string; width: number; height: number; virtual?: boolean}) : WINDOWType {
+
+    let canvasEl: HTMLCanvasElement;
 
     if (typeof canvas !== 'undefined') {
         canvasEl = <HTMLCanvasElement>document.getElementById(canvas);
@@ -39,18 +60,38 @@ export function init({canvas, width, height}: initType = {}) : {canvas: HTMLCanv
         throw Error('You must provide a canvas element for the game');
     }
 
-    if (typeof width !== 'undefined' && typeof height !== 'undefined') {
-        resize(width, height);
-    } else resize();
-
-    context = <CanvasRenderingContext2D>canvasEl.getContext('2d');
-    context.imageSmoothingEnabled = false;
-
-    if (fullWindow) {
-        window.addEventListener('resize', () => resize());
+    WINDOW = {
+        canvasEl,
+        context: <CanvasRenderingContext2D> canvasEl.getContext('2d'),
+        virtualEnable: virtual,
+        width,
+        height,
+        scale: 1,
+        x: 0,
+        y: 0
     }
 
-    emit('init');
+    WINDOW.context.imageSmoothingEnabled = false;
 
-    return { canvas: canvasEl, context };
+    window.addEventListener('resize', () => {
+        if (!virtual) return;
+        WINDOW.canvasEl.width = window.innerWidth;
+        WINDOW.canvasEl.height = window.innerHeight;
+        WINDOW.scale = getWindowScale();
+        WINDOW.x = getWindowX();
+        WINDOW.y = getWindowY();
+    });
+
+    if (virtual) {
+        WINDOW.canvasEl.width = window.innerWidth;
+        WINDOW.canvasEl.height = window.innerHeight;
+        WINDOW.scale = getWindowScale();
+        WINDOW.x = getWindowX();
+        WINDOW.y = getWindowY();
+    } else {
+        WINDOW.canvasEl.width = width;
+        WINDOW.canvasEl.height = height;
+    }
+
+    return WINDOW;
 }
