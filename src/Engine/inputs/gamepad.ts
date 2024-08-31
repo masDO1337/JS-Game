@@ -1,4 +1,5 @@
-import { on } from "../events.js";
+import { on, emit } from "../events.js";
+import Vector from "../vector.js";
 
 export type gamepadButtonName = "south" |
     "east" |
@@ -20,17 +21,7 @@ export type gamepadButtonName = "south" |
     "dpadRight" |
     "logoButton";
 
-type gamepadButtonT = { pressed: boolean; value: number, x?: number, y?: number};
-type buttonsType = {[key: string]: gamepadButtonT};
-type axesType = {leftStick: gamepadButtonT, rightStick: gamepadButtonT}
-
-type gamepadType = {pressedButtons: buttonsType, axes: axesType}
-
-let deadZone: number;
-
-let gamepads: gamepadType[] = [];
-
-export const gamepadMap: string[] = [
+const gamepadMap: string[] = [
     'south',
     'east',
     'west',
@@ -50,26 +41,40 @@ export const gamepadMap: string[] = [
     'logo'
 ];
 
+type gamepadButtonT = {pressed: boolean; value: number};
+type buttonsType = {[key: string]: gamepadButtonT};
+type axesType = {leftStick: Vector, rightStick: Vector}
+
+type gamepadType = {buttons: buttonsType, axes: axesType}
+
+let deadZone: number;
+
+let gamepads: gamepadType[] = [];
+
 function gamepadConnectedHandler(event: GamepadEvent) {
+    emit("gamepadConnected", event.gamepad.id);
+    
     gamepads[event.gamepad.index] = {
-        pressedButtons: {},
+        buttons: {},
         axes: {
-            leftStick: {pressed: false, value: NaN, x: 0, y: 0}, 
-            rightStick: {pressed: false, value: NaN, x: 0, y: 0}
+            leftStick: new Vector(), 
+            rightStick: new Vector()
         }
     };
 }
 
 function gamepadDisconnectedHandler(event: GamepadEvent) {
+    emit("gamepadDisconnected", event.gamepad.id);
+    
     delete gamepads[event.gamepad.index];
 }
 
 function blurEventHandler() {
     gamepads.map(gamepad => {
-        gamepad.pressedButtons = {};
+        gamepad.buttons = {};
         gamepad.axes = {
-            leftStick: {pressed: false, value: NaN, x: 0, y: 0}, 
-            rightStick: {pressed: false, value: NaN, x: 0, y: 0}
+            leftStick: new Vector(), 
+            rightStick: new Vector()
         }
     });
 }
@@ -88,45 +93,39 @@ function updateGamepad() {
         // any index that doesn't have a gamepad connected
         if (!gamepad) continue;
 
-        let { pressedButtons, axes } = gamepads[gamepad.index];
+        let { buttons, axes } = gamepads[gamepad.index];
 
         gamepad.buttons.map((button, index) => {
-            let buttonName = gamepadMap[index] as gamepadButtonName;
+            let buttonName = gamepadMap[index];
             let { pressed, value } = button;
 
-            let state = pressedButtons[buttonName];
+            let state = buttons[buttonName];
 
             if (pressed) {
-                pressedButtons[buttonName] = {pressed, value};
+                buttons[buttonName] = {pressed, value};
             } else if (state?.pressed && !pressed) {
-                delete pressedButtons[buttonName];
+                delete buttons[buttonName];
             }
         });
 
-        if (!isDeadZone(gamepad.axes[0]) || !isDeadZone(gamepad.axes[1])) axes.leftStick.pressed = true;
-        else axes.leftStick.pressed = false;
         axes.leftStick.x = gamepad.axes[0]; 
         axes.leftStick.y = gamepad.axes[1];
 
-        if (!isDeadZone(gamepad.axes[2]) || !isDeadZone(gamepad.axes[3])) axes.rightStick.pressed = true;
-        else axes.rightStick.pressed = false;
         axes.rightStick.x = gamepad.axes[2]; 
         axes.rightStick.y = gamepad.axes[3];
     }
 }
 
-function isAxes(name: gamepadButtonName) : boolean {
-    return ["leftStick","rightStick"].includes(name);
+export function gamepadButton(name: gamepadButtonName, id: number = 0) : gamepadButtonT {
+    if (gamepads.length === 0) return {pressed: false, value: 0};
+    let pressedButton = gamepads[id].buttons[name];
+    if (pressedButton !== undefined) return pressedButton;
+    return {pressed: false, value: 0};
 }
 
-export function gamepad(name: gamepadButtonName | keyof axesType, id: number = 0) : gamepadButtonT {
-    if (gamepads.length === 0) return {pressed: false, value: 0, x: 0, y: 0};
-    let pressedButton = gamepads[id].pressedButtons[name];
-    if (pressedButton !== undefined) return pressedButton;
-    if (isAxes(name)) {
-        return gamepads[id].axes[<keyof axesType>name];
-    }
-    return {pressed: false, value: 0, x: 0, y: 0};
+export function gamepadAxes(name: "leftStick" | "rightStick", id: number = 0) : Vector {
+    if (gamepads.length === 0) return new Vector();
+    return gamepads[id].axes[name];
 }
 
 export function initGamepad(deadzone: number = 0.05) {

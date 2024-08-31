@@ -1,26 +1,19 @@
-import { getVWindow } from "../Engine/core.js";
-import GameLoop from "../Engine/gameLoop.js";
+import Loop from "../Engine/Loop.js";
+import { WIDTH, HEIGHT } from "../Engine/core.js";
+import { initGamepad } from "../Engine/inputs/gamepad.js";
 
-export default class Game {
-
-    private WINDOW = getVWindow();
-
-    private loop = GameLoop();
-
-    constructor() {
-        this.loop.update = (dt) => this.update(dt);
-        this.loop.render = (context) => this.render(context);
-
-        this.loop.start();
+export default class Game extends Loop {
+    constructor(){
+        super();
+        initGamepad();
     }
 
-    update(dt: number) : void {
-
+    update(dt: number): void {
+        
     }
 
-    render(context: CanvasRenderingContext2D) : void {
-
-        context.fillStyle = "#ff00ff";
-        context.fillRect(0, 0, this.WINDOW.width, this.WINDOW.height);
+    render(context: CanvasRenderingContext2D): void {
+        context.fillStyle = "#f0f";
+        context.fillRect(0, 0, WIDTH, HEIGHT);
     }
 }
