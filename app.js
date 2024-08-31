@@ -9,5 +9,8 @@ app.use(express.static("public"));
 const server = createServer(app);
 const io = new Server(server);
 
+io.on("connect", (socket) => {
+
+});
 
 server.listen(5500, () => console.log(`listening on http://localhost:${5500}`));
