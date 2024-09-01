@@ -19,7 +19,7 @@ export default class Loop {
         let accumulator: number = 0;
         let delta: number = 1e3 / fps; // delta between performance.now timings (in ms)
         let step: number = 1 / fps;
-        let last: number, dt: number;
+        let last: number = 0, dt: number;
 
         let update = this.update;
         let render = this.render;
