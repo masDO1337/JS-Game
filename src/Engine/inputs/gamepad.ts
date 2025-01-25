@@ -67,6 +67,7 @@ function gamepadDisconnectedHandler(event: GamepadEvent) {
     emit("gamepadDisconnected", event.gamepad.id);
     
     delete gamepads[event.gamepad.index];
+    gamepads.length -= 1;
 }
 
 function blurEventHandler() {
@@ -77,10 +78,6 @@ function blurEventHandler() {
             rightStick: new Vector()
         }
     });
-}
-
-function isDeadZone(n: number): boolean {
-    return n < deadZone && n > -deadZone;
 }
 
 function updateGamepad() {
@@ -123,9 +120,15 @@ export function gamepadButton(name: gamepadButtonName, id: number = 0) : gamepad
     return {pressed: false, value: 0};
 }
 
+function isDeadZone(n: number): boolean {
+    return n < deadZone && n > -deadZone;
+}
+
 export function gamepadAxes(name: "leftStick" | "rightStick", id: number = 0) : Vector {
     if (gamepads.length === 0) return new Vector();
-    return gamepads[id].axes[name];
+    let axes = gamepads[id].axes[name];
+    if (isDeadZone(axes.x) && isDeadZone(axes.y)) return new Vector();
+    return axes;
 }
 
 export function initGamepad(deadzone: number = 0.05) {

@@ -14,8 +14,8 @@ export default class GameObject extends Updatable {
     private _scy: number = 1;
     private _c: [] = [];
 
-    constructor({width = 0, height = 0, opacity = 1, rotation = 0, scaleX = 1, scaleY = 1, children = [], ...props} = {}) {
-        super(props);
+    constructor({width = 0, height = 0, opacity = 1, rotation = 0, scaleX = 1, scaleY = 1, children = []} = {}) {
+        super();
         this.width = width;
         this.height = height;
         this.opacity = opacity;
@@ -72,7 +72,6 @@ export default class GameObject extends Updatable {
     draw(context: CanvasRenderingContext2D) : void {}
 
     _pc() : void {
-        
         if (!this._ready) return;
         this._updateWorldPos();
         this.children.map((child: GameObject) => child._pc());

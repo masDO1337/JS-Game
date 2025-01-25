@@ -3,42 +3,45 @@ import { emit } from './events.js';
 
 export default class Loop {
 
-    constructor(fps = 60, blur = false) {
+    private focused: boolean = true;
 
-        let focused: boolean = true;
+    private accumulator: number = 0;
+    private delta: number;
+    private step: number;
+    private last: number = 0;
+    private dt: number = 0;
+
+    private frame
+
+    constructor(update: (dt:number) => void, render: (context: CanvasRenderingContext2D) => void, fps = 60, blur = false) {
 
         if (!blur) {
             window.addEventListener('focus', () => {
-                focused = true;
+                this.focused = true;
             });
             window.addEventListener('blur', () => {
-                focused = false;
+                this.focused = false;
             });
         }
 
-        let accumulator: number = 0;
-        let delta: number = 1e3 / fps; // delta between performance.now timings (in ms)
-        let step: number = 1 / fps;
-        let last: number = 0, dt: number;
-
-        let update = this.update;
-        let render = this.render;
-
-        function frame(now: number) : void {
-            requestAnimationFrame(frame);
+        this.delta = 1e3 / fps; // delta between performance.now timings (in ms)
+        this.step = 1 / fps;
+        
+        this.frame = (now: number) => {
+            requestAnimationFrame(this.frame);
     
-            dt = now - last;
-            last = now;
-
-            if (!focused) return;
+            this.dt = now - this.last;
+            this.last = now;
+    
+            if (!this.focused) return;
     
             emit('tick');
-            accumulator += dt;
+            this.accumulator += this.dt;
     
-            while (accumulator >= delta) {
-                update(step);
+            while (this.accumulator >= this.delta) {
+                update(this.step);
     
-                accumulator -= delta;
+                this.accumulator -= this.delta;
             }
             context.clearRect(0, 0, canvasEl.width, canvasEl.height);
             context.save();
@@ -48,10 +51,6 @@ export default class Loop {
             render(context);
             context.restore();
         }
-
-        requestAnimationFrame(frame);
+        requestAnimationFrame(this.frame);
     }
-
-    update(dt: number): void {}
-    render(context: CanvasRenderingContext2D): void {}
 }

@@ -91,12 +91,10 @@ export class Updatable {
     velocity: Vector;
     acceleration: Vector;
 
-    constructor({...props}) {
+    constructor() {
         this.position = new Vector();
         this.velocity = new Vector();
         this.acceleration = new Vector();
-
-        Object.assign(this, props);
     }
 
     update(dt?: number) : void {

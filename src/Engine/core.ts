@@ -33,7 +33,6 @@ export function initCanvas({canvas, width, height}: {canvas?: string; width: num
     canvasEl.width = window.innerWidth;
     canvasEl.height = window.innerHeight;
 
-
     context.imageSmoothingEnabled = false;
 
     window.addEventListener('resize', () => {

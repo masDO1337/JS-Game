@@ -1,19 +1,21 @@
 import Loop from "../Engine/Loop.js";
-import { WIDTH, HEIGHT } from "../Engine/core.js";
-import { initGamepad } from "../Engine/inputs/gamepad.js";
+import Input from "./Input.js";
+import Player from "./Entity/Player.js";
 
-export default class Game extends Loop {
+export default class Game {
+
+    private player: Player = new Player();
+
     constructor(){
-        super();
-        initGamepad();
+        new Loop(dt=>this.update(dt), context=>this.render(context));
+        new Input();
     }
 
     update(dt: number): void {
-        
+        this.player.update(dt);
     }
 
     render(context: CanvasRenderingContext2D): void {
-        context.fillStyle = "#f0f";
-        context.fillRect(0, 0, WIDTH, HEIGHT);
+        this.player.render(context);
     }
 }
